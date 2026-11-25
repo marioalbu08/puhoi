@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puhoi: simulator de mulțime pentru festivaluri</title>
+<meta name="description" content="Desenezi planul unui festival și simulezi zeci de mii de oameni: unde apare îmbulzeala și cât durează evacuarea.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Crect width=%2716%27 height=%2716%27 rx=%273%27 fill=%27%231a1a19%27/%3E%3Ccircle cx=%275%27 cy=%275%27 r=%272%27 fill=%27%236da7ec%27/%3E%3Ccircle cx=%2711%27 cy=%276%27 r=%272%27 fill=%27%23fab219%27/%3E%3Ccircle cx=%277%27 cy=%2711%27 r=%272%27 fill=%27%23d03b3b%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="bar">
+  <div class="brand"><strong>Puhoi</strong><span>simulator de mulțime pentru festivaluri</span></div>
+  <div class="controls">
+    <label class="field">Oameni
+      <select id="people" aria-label="Numărul de oameni"></select>
+    </label>
+    <button id="play" class="btn" title="Spațiu">Pauză</button>
+    <div class="seg" id="speed" role="group" aria-label="Viteza simulării">
+      <button data-v="1">1×</button><button data-v="4">4×</button><button data-v="8">8×</button><button data-v="16">16×</button>
+    </div>
+    <button id="evac" class="btn danger" title="E">Evacuare</button>
+    <button id="reset" class="btn" title="R">De la capăt</button>
+  </div>
+  <div class="perf" id="perf" aria-live="off"></div>
+</header>
+
+<main>
+  <aside class="tools" aria-label="Unelte de desenat">
+    <h2>Planul</h2>
+    <div id="toolbox" class="toolbox" role="radiogroup" aria-label="Unealtă"></div>
+    <label class="field col">Mărimea pensulei <output id="brushOut">2 m</output>
+      <input id="brush" type="range" min="1" max="12" value="2">
+    </label>
+    <button id="undo" class="btn" title="Ctrl+Z">Anulează</button>
+    <label class="field col">Plan de pornire
+      <select id="layout"></select>
+    </label>
+    <button id="share" class="btn">Copiază linkul planului</button>
+    <p class="hint">Trage cu mouse-ul ca să desenezi. Rotița face zoom, iar cu butonul din dreapta sau cu unealta „Mută” muți harta. Poți desena și în timpul evacuării.</p>
+    <p class="hint">De aproape, fiecare om apare ca un omuleț. Cu unealta „Mută”, un clic pe cineva îl urmărește cu camera.</p>
+  </aside>
+
+  <section class="stage">
+    <div id="view" class="view">
+      <canvas id="overlay" class="overlay"></canvas>
+      <div id="msg" class="msg" hidden></div>
+      <div id="follow" class="follow" hidden aria-live="polite">
+        <div class="ft">Urmărești omul nr. <b id="fId"></b></div>
+        <div id="fWhat" class="fw"></div>
+        <div class="fs"><span id="fSpeed"></span><span id="fDens"></span></div>
+        <button id="fStop" class="btn sm" type="button">Nu-l mai urmări <kbd>Esc</kbd></button>
+      </div>
+      <div class="zoombar" role="group" aria-label="Zoom">
+        <button id="zIn" class="btn" type="button" title="Apropie (+)" aria-label="Apropie">+</button>
+        <button id="zOut" class="btn" type="button" title="Depărtează (−)" aria-label="Depărtează">−</button>
+        <button id="zFit" class="btn" type="button" title="Tot planul (0)">Tot planul</button>
+        <button id="zClose" class="btn" type="button" title="Zboară în cea mai deasă mulțime, la viteza reală (C)">De aproape</button>
+      </div>
+    </div>
+    <div class="legend" aria-label="Legendă">
+      <span class="key"><i style="background:#6da7ec"></i>sub 4 pers./m²</span>
+      <span class="key"><i style="background:#fab219"></i>▲ 4–5 pers./m², atenție</span>
+      <span class="key"><i style="background:#d03b3b"></i>● peste 5 pers./m², pericol</span>
+      <span class="sep"></span>
+      <span class="key"><i class="sq" style="background:#8f8c85"></i>gard</span>
+      <span class="key"><i class="sq" style="background:#0ca30c"></i>ieșire</span>
+      <span class="key"><i class="sq" style="background:#9085e9"></i>scenă</span>
+      <span class="key"><i class="sq" style="background:#d55181"></i>bar</span>
+      <span class="key"><i class="sq" style="background:#199e70"></i>toalete</span>
+    </div>
+  </section>
+
+  <aside class="panel" aria-label="Rezultate">
+    <section class="card">
+      <div class="phase" id="phase">Se încarcă</div>
+      <div class="hero" id="hero">–</div>
+      <div class="sub" id="heroSub">&nbsp;</div>
+      <div class="meter" id="progress" hidden><i></i></div>
+      <div class="tiles">
+        <div class="tile"><span class="label">Densitate maximă</span><span class="value" id="tMax">–</span><span class="unit">pers./m²</span></div>
+        <div class="tile"><span class="label">Oameni în zone de pericol</span><span class="value" id="tCrit">–</span><span class="unit">peste 5 pers./m²</span></div>
+        <div class="tile"><span class="label">Expunere</span><span class="value" id="tExpo">–</span><span class="unit">persoane-minut</span></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Oameni rămași în incintă</h2>
+      <div class="chart" id="chartBox">
+        <canvas id="chart"></canvas>
+        <div class="tip" id="tip" hidden></div>
+      </div>
+      <table class="mini" id="marks">
+        <thead><tr><th>Au ieșit</th><th>50%</th><th>90%</th><th>95%</th><th>toți</th></tr></thead>
+        <tbody><tr><th>Timp</th><td>–</td><td>–</td><td>–</td><td>–</td></tr></tbody>
+      </table>
+      <p class="note" id="guideNote"></p>
+    </section>
+
+    <section class="card">
+      <h2>Ieșiri</h2>
+      <table class="mini exits" id="exits">
+        <thead><tr><th>Nr.</th><th>Lățime</th><th>Au ieșit</th><th>Acum</th><th>Debit față de ghid</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="note">Ghidul britanic pentru stadioane (Green Guide) socotește 82 de persoane pe minut pentru fiecare metru de poartă.</p>
+    </section>
+
+    <section class="card">
+      <h2>Ipoteze</h2>
+      <label class="field col">Câți oameni știu ce ieșiri sunt libere <output id="guidedOut">50%</output>
+        <input id="guided" type="range" min="0" max="100" step="10" value="50">
+      </label>
+      <label class="field col">Timp de reacție, cel mult <output id="reactOut">20 s</output>
+        <input id="react" type="range" min="0" max="120" step="5" value="20">
+      </label>
+      <label class="field col">Culoarea oamenilor
+        <select id="colorMode"><option value="0">după densitate</option><option value="1">după viteză</option><option value="2">după destinație</option></select>
+      </label>
+      <label class="field col">Harta arată
+        <select id="layer"><option value="0">densitatea de acum</option><option value="1">zonele de risc (maximul atins)</option></select>
+      </label>
+    </section>
+
+    <section class="card">
+      <h2>Rulări</h2>
+      <table class="mini" id="runs">
+        <thead><tr><th>Nr.</th><th>Oameni</th><th>Ieșiri</th><th>95% afară</th><th>Toți afară</th><th>Expunere</th></tr></thead>
+        <tbody><tr><td colspan="6" class="empty">Apasă „Evacuare” ca să măsori planul. Schimbă planul și compară.</td></tr></tbody>
+      </table>
+    </section>
+  </aside>
+</main>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
