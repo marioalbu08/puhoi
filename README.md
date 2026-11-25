@@ -1,14 +1,83 @@
 # Puhoi
 
-Desenezi planul unui festival și simulezi până la 100.000 de oameni, fiecare în parte: unde se formează îmbulzeala, pe ce porți ies și cât durează evacuarea. Simularea rulează pe placa video, direct în browser.
+**Simulator de evacuare pentru festivaluri, pe placa video, direct în browser.** Desenezi planul unui festival, pui până la 150.000 de oameni, fiecare simulat separat, și vezi unde se formează îmbulzeala, pe ce porți iese lumea și cât durează evacuarea.
+
+**Demo live:** https://marioalbu08.github.io/puhoi/ (Chrome sau Edge, pe calculator)
+
+WebGPU · fără dependențe · fără build · 165 KB de cod (51 KB comprimat) · 120.000 de oameni la 60 de cadre pe secundă pe un laptop cu GTX 1650
 
 ![Evacuarea a 50.000 de oameni, după circa 3 minute: cozi roșii la ieșirile de lângă scenă](evacuare.png)
 
-## De ce există
+## Demo în 60 de secunde
 
-Calculul obișnuit pentru evacuare e o împărțire: câți oameni sunt, câți metri de porți ai, câți oameni trec pe minut printr-un metru de poartă. El presupune că toate porțile lucrează la capacitate din prima secundă. În realitate oamenii merg spre ieșirea cea mai apropiată, așa că unele porți se sufocă, iar altele stau aproape goale.
+1. Deschide [demo-ul](https://marioalbu08.github.io/puhoi/) în Chrome sau Edge.
+2. La „Plan de pornire”, alege **Beach, Please! 2026 (aproximativ, doar porțile publice)**.
+3. Apasă **C**. Camera zboară în cea mai deasă mulțime, iar cei din fața scenei sar pe ritm.
+4. Apasă **E**. Pornește evacuarea: graficul și tabelul cu porți se completează în timp real.
+5. Alege **Beach, Please! 2026 + ieșiri de urgență ipotetice**, apasă **E** din nou și compară cele două rulări în tabelul „Rulări”.
 
-Pe planul implicit, cu 50.000 de oameni și 48 m de porți, calculul din ghid dă **12:42**. Simularea, cu ipotezele implicite, dă **33:07**, fiindcă 44% din public iese pe cele două porți de lângă scenă, care au împreună doar 8 m.
+| De aproape, într-o coadă la ieșire | Concertul, înainte de evacuare |
+| --- | --- |
+| ![Oameni văzuți de sus, într-o coadă densă](aproape.png) | ![Publicul în fața scenei](screenshot.png) |
+
+## Problema
+
+Calculul obișnuit pentru evacuare e o împărțire: câți oameni sunt, câți metri de porți ai, câți oameni trec pe minut printr-un metru de poartă. Calculul presupune că toate porțile lucrează la capacitate din prima secundă. În realitate, oamenii merg spre ieșirea cea mai apropiată, așa că unele porți se sufocă, iar altele stau aproape goale.
+
+Pe planul implicit, cu 7 porți care au în total 48 m, și 50.000 de oameni, calculul din ghid dă **12:42**. Simularea dă **23:27**, cu ipotezele implicite: jumătate dintre oameni știu ce ieșiri sunt libere, iar fiecare pornește după cel mult 20 de secunde. Cele două porți de câte 4 m de lângă scenă au preluat 16.053 de oameni, adică 32% din public, prin 8 din cei 48 de metri.
+
+Am lărgit apoi cele două porți de lângă scenă de la 4 m la 12 m și am rulat din nou aceeași evacuare:
+
+| | Plan implicit | Porțile de lângă scenă lărgite |
+| --- | --- | --- |
+| Lățimea totală a porților | 48 m | 64 m |
+| Calculul din ghid | 12:42 | 9:31 |
+| 50% afară | 6:48 | 5:26 |
+| 90% afară | 15:43 | 10:10 |
+| 95% afară | 19:19 | 11:15 |
+| Toți afară | 23:27 | 12:47 |
+| Densitatea maximă | 5,9 pers./m² | 5,7 pers./m² |
+| Expunere la peste 5 pers./m² | 22.167 persoane-minut | 548 persoane-minut |
+
+Cu o treime mai mulți metri de poartă, evacuarea se scurtează cu 46%, iar expunerea scade de 40 de ori. Calculul din ghid nu poate arăta asta, fiindcă nu știe unde sunt porțile.
+
+## Studiu de caz: Beach, Please! 2026
+
+Beach, Please! 2026 a avut loc între 8 și 12 iulie, în stațiunea NIBIRU din Costinești, pe aproximativ 21 de hectare. În a doua seară au intrat peste 120.000 de oameni, iar vârful festivalului a fost de circa 155.000 pe zi. Harta oficială arată patru scene și **două porți publice**, la aproape 650 m una de alta: una în nord-vest, dinspre parcare, peste calea ferată, și una în sud-est, spre faleză.
+
+Planul de evacuare al festivalului nu este public. Nici organizatorii, nici ISU Dobrogea nu au publicat numărul sau lățimea ieșirilor de urgență și nici punctele de adunare. De aceea, simularea nu spune cât durează evacuarea reală. Ea arată cât ar dura cu ipotezele de mai jos și cât contează fiecare metru de poartă.
+
+Am refăcut planul la scară, 520 × 400 m, cu o celulă pe metru, după harta oficială 2026:
+
+| Ce | De unde |
+| --- | --- |
+| Mărimea terenului, cele patru scene și orientarea lor | harta oficială (scena principală e în sud-vest, cu fața spre nord) |
+| Cele două porți publice și pozițiile lor | harta oficială |
+| 120.000 de oameni | a doua seară din 2026 |
+| Lățimea porților: 24 m fiecare | **presupusă**, fiindcă nu e publicată |
+| Cele 6 ieșiri de urgență de câte 10 m din a doua variantă | **inventate**, ca să se vadă efectul |
+| Pozițiile barurilor, toaletelor și clădirilor | **aproximative**, fiindcă harta oficială e schematică |
+
+Marea nu este o cale de evacuare: terenul nu ajunge la plajă, iar între festival și apă sunt o stradă și faleza.
+
+Rezultatele, cu 120.000 de oameni și ipotezele implicite (jumătate știu ce ieșiri sunt libere, reacție în cel mult 20 de secunde):
+
+| | Doar porțile publice | + ieșiri de urgență ipotetice |
+| --- | --- | --- |
+| Porți | 2 × 24 m = 48 m | 48 m + 6 × 10 m = 108 m |
+| Calculul din ghid | 30:29 | 13:33 |
+| 50% afară | 21:46 | 10:54 |
+| 90% afară | 40:57 | 36:01 |
+| 95% afară | 44:57 | 48:14 |
+| Toți afară | 49:30 | 62:00 |
+| Densitatea maximă | 5,8 pers./m² | 6,1 pers./m² |
+| Expunere la peste 5 pers./m² | 39.830 persoane-minut | 268.753 persoane-minut |
+
+**Doar cu porțile publice**, evacuarea durează cu 19 minute mai mult decât spune ghidul. Porțile sunt la 650 m una de alta, iar publicul de la scena principală, din colțul de sud-vest, trebuie să traverseze tot terenul. Poarta de sud-est preia 73.969 de oameni (62%), iar cea de nord-vest 46.031.
+
+**Cu încă 60 m de ieșiri**, prima jumătate a publicului iese de două ori mai repede, dar ultimii oameni ies mai târziu (62:00 față de 49:30), iar expunerea e de 7 ori mai mare. Explicația e în numărătoarea pe ieșiri: ieșirea de 10 m din sud, dintre scena principală și Nibiru Arena, a strâns 29.397 de oameni, iar una de pe latura de est 19.249. Cine nu știe ce ieșiri sunt libere merge la cea mai apropiată și rămâne la ea. Prin 10 m, 29.397 de oameni au nevoie de cel puțin 36 de minute, chiar la debitul maxim din ghid.
+
+Concluzia: mai multe ieșiri nu ajută automat. Contează unde sunt și cât de late sunt față de mulțimea din jurul lor, iar asta se vede doar dacă simulezi fiecare om. În aplicație poți lărgi chiar tu ieșirile cele mai aglomerate și poți compara rulările.
 
 ## Ce face
 
@@ -23,29 +92,48 @@ Pe planul implicit, cu 50.000 de oameni și 48 m de porți, calculul din ghid d�
 - **Simulează și concertul.** Înainte de evacuare, publicul stă în fața scenei, iar o parte merge la bar sau la toaletă și se întoarce.
 - **Are două ipoteze pe care le poți schimba:** câți oameni știu ce ieșiri sunt libere (de la stewarzi sau de pe ecrane) și cât durează până încep să se miște.
 - **Păstrează planul într-un link**, pe care îl poți trimite altcuiva.
-- **Se vede și de aproape.** Când faci zoom, fiecare om apare ca un omuleț văzut de sus, care pășește și se uită încotro merge. Cu unealta „Mută”, un clic pe cineva îl urmărește cu camera.
+- **Se vede și de aproape.** Când faci zoom, fiecare om devine un omuleț văzut de sus, care pășește și se uită încotro merge. Cu unealta „Mută”, un clic pe cineva îl urmărește cu camera și îți arată ce face, cât de repede merge și câtă lume e în jurul lui.
 
-| De aproape, într-o coadă la ieșire | Concertul, înainte de evacuare |
+## Cum funcționează
+
+Nu are server și nici pas de build: sunt module JavaScript încărcate direct de browser, plus 3 shadere de calcul și 2 de desenare, în WGSL. Tot calculul se face pe placa video a celui care deschide pagina, așa că găzduirea e doar o pagină statică.
+
+### Simularea
+
+| Parte | Cum |
 | --- | --- |
-| ![Oameni văzuți de sus, într-o coadă densă](aproape.png) | ![Publicul în fața scenei](screenshot.png) |
+| Pasul | Trei treceri de calcul pe placa video, de 20 de ori pe secundă simulată: oamenii sunt sortați în celule de 1 m cu contoare atomice, apoi fiecare se mișcă, apoi se recalculează harta de densitate |
+| Drumul spre țintă | Pentru fiecare țintă (scenă, bar, toalete, ieșiri) se calculează un câmp de direcții cu metoda fast marching, așa că drumurile pot merge în orice unghi, nu doar pe cele 8 direcții ale grilei |
+| Alegerea ieșirii | Fiecare loc aparține zonei celei mai apropiate ieșiri. Cine nu știe ce ieșiri sunt libere merge la ieșirea zonei lui și nu o schimbă, dar folosește toată lățimea porții și ocolește blocajele: drumul lui se recalculează de două ori pe secundă, în interiorul zonei, cu locurile aglomerate mai greu de traversat. Cine știe ce ieșiri sunt libere urmează un al doilea câmp, care îl poate trimite la altă ieșire. Ambele câmpuri se calculează într-un web worker, ca să nu blocheze pagina |
+| Viteza de mers | Relația viteză–densitate a lui Weidmann, aplicată densității medii pe circa 9 m², citită puțin în fața omului |
+| Vecinii | Fiecare se uită doar în cele 9 celule din jur: păstrează distanța, nu intră în cel din față și ocolește la dreapta pe cine vine din față |
+| Gardurile | Coliziune exactă cerc–pătrat cu celulele pline din jur |
+| Riscul | Pe placa video, la fiecare pas: densitatea, maximul atins și timpul petrecut de fiecare loc peste 5 persoane/m² |
+| Rezerva | Aceeași simulare scrisă în JavaScript, pentru browserele fără WebGPU (cel mult 10.000 de oameni) și pentru testele din Node |
 
-## Un exemplu
+### Desenarea
 
-Am lărgit cele două ieșiri de lângă scenă de la 4 m la 12 m și am rulat din nou aceeași evacuare: 50.000 de oameni, jumătate dintre ei știu ce ieșiri sunt libere, timp de reacție de cel mult 20 de secunde.
+- **Mișcare lină.** Simularea avansează în pași de 0,05 secunde. Fiecare cadru desenează oamenii între ultimii doi pași, citind direct ambele copii ale memoriei de pe placa video, fără să treacă prin procesor.
+- **Omuleții.** Fiecare om e un singur dreptunghi, rotit după direcția în care se uită. Forma (umeri, cap, față, brațe, picioare și umbră) e calculată pixel cu pixel din funcții de distanță, cu margini netezite. Pasul vine din faza mersului, ținută în memoria fiecărui om: un ciclu complet la 1,4 m. Cine stă pe loc se uită spre ce așteaptă (scena, barul sau ieșirea), citind același câmp de direcții ca simularea. La concert, cei din fața scenei sar pe 124 de bătăi pe minut, unii cu mâinile sus.
+- **Harta.** La fiecare modificare a planului, procesorul calculează un câmp de distanță cu semn (o transformare chamfer în două treceri) și umbrele aruncate: 5 ms pentru planul de 320 × 200 m, 14 ms pentru Beach, Please!. Shaderul citește 4 valori pe pixel și obține din ele margini netede, acoperișuri cu pantă luminate după normală, umbre și texturile: acoperișul scenei cu bandă LED pe ritm, copertina barului peste tejghea, cabinele de toaletă, gardurile, clădirile și săgețile de la ieșiri. De departe, toate trec în culorile din legendă, ca să nu pâlpâie.
+- **Plăci video slabe.** Oamenii din afara ecranului ies din calcul înainte de orice altceva. Dreptunghiurile sunt strânse pe figură, așa că se desenează de circa 3 ori mai puțini pixeli. Sub 40 de cadre pe secundă, harta se desenează la rezoluție mai mică, până la jumătate. Dacă placa video rămâne în urmă, simularea încetinește în loc să blocheze pagina.
 
-| | Plan implicit | Ieșirile de lângă scenă lărgite |
+### Performanță
+
+Măsurat pe 25 noiembrie 2026, pe un laptop cu Intel Core i7-9750H, cu ambele plăci video, în Chrome, pe un ecran de 2560 × 1080:
+
+| | Intel UHD 630 (integrată) | NVIDIA GTX 1650 |
 | --- | --- | --- |
-| Lățimea totală a porților | 48 m | 64 m |
-| Calculul din ghid | 12:42 | 9:32 |
-| 95% afară, în simulare | 28:13 | 12:52 |
-| Toți afară, în simulare | 33:07 | 16:14 |
-| Expunere la peste 5 persoane/m² | 107.002 persoane-minut | 5.633 persoane-minut |
+| Un pas de simulare, 50.000 de oameni | 2,95 ms | 0,54 ms |
+| Un pas de simulare, 120.000 de oameni (Beach, Please!) | 6,43 ms | 1,44 ms |
+| Un cadru, tot planul cu 50.000 de oameni | 7,5 ms | 0,8 ms |
+| Un cadru de aproape, cu omuleți | 17,8 ms | 1,5 ms |
 
-Cu o treime mai mulți metri de poartă, evacuarea durează la jumătate, iar expunerea scade de 19 ori. Calculul din ghid nu poate arăta asta, fiindcă nu știe unde sunt porțile.
+Pe placa integrată, vederea de aproape avea 22–24 de cadre pe secundă înainte de optimizări și are 56 acum, cu simularea în timp real. Laptopurile cu două plăci video dau adesea browserului placa integrată, aici de 5 până la 12 ori mai lentă. Pagina observă asta și îți spune cum treci Chrome pe placa dedicată.
 
 ## Ce am măsurat
 
-Toate cifrele de mai jos sunt măsurate pe 25 noiembrie 2026, pe un laptop cu NVIDIA GeForce GTX 1650, în Chrome. Le poți reface cu `node test/validate.mjs`.
+Toate cifrele de mai jos se pot reface cu `node test/validate.mjs`.
 
 **Viteza de mers la densitate fixă**, într-un coridor de 60 × 10 m, față de relația lui Weidmann:
 
@@ -64,39 +152,16 @@ Simularea iese cu cel mult 0,10 m/s sub Weidmann, fiindcă cei rapizi rămân î
 
 Ghidul britanic pentru stadioane (Green Guide) socotește 82.
 
-**Placa video față de procesor.** Aceeași evacuare, cu 10.000 de oameni, rulată cu cele două implementări:
+**Placa video față de procesor.** Aceeași evacuare a planului implicit, cu 10.000 de oameni, rulată cu cele două implementări:
 
 | | 50% afară | 90% afară | 95% afară | Toți afară |
 | --- | --- | --- | --- | --- |
-| Placa video (WebGPU) | 2:19 | 7:50 | 8:44 | 9:46 |
-| Procesor (JavaScript) | 2:19 | 7:50 | 8:44 | 9:44 |
+| Placa video, nimeni nu știe ce ieșiri sunt libere | 1:49 | 6:15 | 7:01 | 7:50 |
+| Procesor, nimeni nu știe ce ieșiri sunt libere | 1:52 | 6:18 | 7:03 | 7:52 |
+| Placa video, jumătate știu | 1:52 | 4:16 | 4:58 | 5:45 |
+| Procesor, jumătate știu | 1:51 | 4:09 | 4:53 | 5:40 |
 
-**Viteza de calcul**, pentru un pas de simulare (0,05 secunde simulate):
-
-| Oameni | Placa video | Procesor |
-| --- | --- | --- |
-| 10.000 | – | 12,1 ms |
-| 50.000 | 0,40 ms în concert, 0,47 ms în evacuare | – |
-| 100.000 | 0,69 ms în concert, 0,89 ms în evacuare | – |
-
-Cu 50.000 de oameni, placa video ar putea simula de aproximativ 100 de ori mai repede decât timpul real. Interfața merge până la 16×.
-
-## Cum funcționează
-
-Nu are server și nici pas de build: sunt module JavaScript încărcate direct de browser.
-
-| Parte | Cum |
-| --- | --- |
-| Drumul spre ieșire | Pentru fiecare țintă (scenă, bar, toalete, ieșiri) se calculează un câmp de direcții cu metoda fast marching, așa că drumurile pot merge în orice unghi, nu doar pe cele 8 direcții ale grilei |
-| Alegerea ieșirii | Două câmpuri: cea mai apropiată ieșire și cea mai rapidă ieșire ținând cont de aglomerația de acum. Al doilea se recalculează de două ori pe secundă, într-un web worker |
-| Viteza de mers | Relația viteză–densitate a lui Weidmann, aplicată densității medii pe circa 9 m², citită puțin în fața omului |
-| Vecinii | Oamenii sunt sortați în celule de 1 m cu contoare atomice, pe placa video. Fiecare se uită doar în cele 9 celule din jur: păstrează distanța, nu intră în cel din față și ocolește la dreapta pe cine vine din față |
-| Gardurile | Coliziune exactă cerc–pătrat cu celulele pline din jur |
-| Harta de densitate | Calculată tot pe placa video, la fiecare pas, împreună cu maximul atins și timpul petrecut peste prag |
-| Desenarea | Aceeași memorie de pe placa video e citită direct de shaderul de desenare, fără să treacă prin procesor. Pozițiile se interpolează între ultimii doi pași, ca mișcarea să fie lină la orice viteză |
-| Rezerva | Aceeași simulare scrisă în JavaScript, pentru browserele fără WebGPU (cel mult 10.000 de oameni) și pentru testele din Node |
-
-Un pas de simulare are trei treceri de calcul pe placa video: sortarea în celule, mișcarea oamenilor și harta de densitate.
+Diferența e de cel mult 3 secunde fără ghidare și de cel mult 7 cu ghidare, fiindcă drumurile care țin cont de aglomerație se recalculează la momente puțin diferite în cele două implementări.
 
 ## Cum îl pornești
 
@@ -106,16 +171,18 @@ Ai nevoie de Chrome sau Edge, care au WebGPU. Servește folderul și deschide pa
 python -m http.server 8000
 ```
 
-Apoi intră pe http://localhost:8000. Deschis direct din fișier nu merge, fiindcă browserul nu încarcă module de pe `file://`.
+Apoi intră pe http://localhost:8000. Deschis direct din fișier nu merge, fiindcă browserul nu încarcă module de pe `file://`. Cu `?plan=beach` pornește direct pe planul Beach, Please!.
 
 - **Spațiu:** pauză. **E:** evacuare. **R:** de la capăt. **1–7:** uneltele. **Ctrl+Z:** anulează.
-- **Rotița sau + și −:** zoom. **0:** tot planul. **C:** de aproape, în locul cel mai aglomerat. **Butonul din dreapta:** muți harta.
+- **Rotița sau + și −:** zoom. **0:** tot planul. **C:** de aproape, în locul cel mai aglomerat. **Butonul din dreapta:** muți harta. **Clic pe un om**, cu unealta „Mută”: îl urmărești. **Esc:** nu-l mai urmărești.
+
+Fără HTTPS sau fără WebGPU, pagina pornește pe procesor, cu cel mult 10.000 de oameni, și spune de ce.
 
 Testele de calibrare:
 
 ```sh
-node test/validate.mjs            # toate
-node test/validate.mjs gate       # doar debitul prin porți
+node test/validate.mjs                # toate
+node test/validate.mjs gate           # doar debitul prin porți
 node test/validate.mjs evac 10000 0   # evacuarea planului implicit, 10.000 de oameni, 0% ghidare
 ```
 
@@ -123,27 +190,32 @@ node test/validate.mjs evac 10000 0   # evacuarea planului implicit, 10.000 de o
 
 | Fișier | Ce conține |
 | --- | --- |
-| `src/model.js` | Constantele modelului, planurile de pornire, așezarea mulțimii |
+| `src/model.js` | Constantele modelului, planurile de pornire (inclusiv Beach, Please!), așezarea mulțimii |
 | `src/field.js` | Câmpurile de direcții (fast marching) |
-| `src/sim-gpu.js` | Simularea și desenarea în WebGPU (shadere WGSL) |
+| `src/sim-gpu.js` | Simularea și desenarea în WebGPU (shadere WGSL), câmpul de distanță al hărții |
 | `src/sim-cpu.js` | Aceeași simulare în JavaScript |
 | `src/render2d.js` | Desenarea pe Canvas, pentru varianta pe procesor |
 | `src/worker.js` | Calculul câmpurilor în afara firului principal |
-| `src/main.js` | Interfața: editorul, controalele, panoul cu rezultate |
-| `test/validate.mjs` | Măsurătorile din secțiunea de mai sus |
+| `src/main.js` | Interfața: editorul, camera, controalele, panoul cu rezultate |
+| `test/validate.mjs` | Măsurătorile din secțiunea „Ce am măsurat” |
 
 ## Limitări
 
 - **Nu e un instrument certificat.** Arată diferențe între planuri, dar nu înlocuiește planul de evacuare făcut de un specialist.
+- **Planul Beach, Please! e aproximativ**, iar lățimile porților și ieșirile de urgență sunt presupuse (vezi studiul de caz).
 - **Oamenii sunt cuminți.** Nu există panică, căzături, grupuri care vor să rămână împreună sau oameni care se întorc după cineva.
-- **Terenul e plat**, fără scări, pante sau noroi, iar dincolo de poartă e loc liber: oamenii dispar imediat ce au ieșit.
+- **Terenul e plat**, fără scări, pante sau noroi, iar dincolo de poartă e loc liber: oamenii dispar imediat ce au ieșit. Coada de la gară sau de la autobuze nu e simulată.
 - **Grila e de 1 m.** Gardurile au cel puțin 1 m grosime, iar porțile au lățimi în metri întregi.
-- **Densitatea e o medie pe circa 9 m².** În cozi, vârfurile ajung până la 5,9 persoane/m², peste limita de 5,4 la care modelul oprește mersul, fiindcă trupurile se pot suprapune puțin.
-- **Câți oameni știu ce ieșiri sunt libere e o ipoteză**, nu o măsurătoare. Rezultatul depinde mult de ea: aceeași evacuare cu 10.000 de oameni durează 9:44 cu 0% și 4:37 cu 100%.
-- **Pe ecran n-am măsurat cadrele pe secundă.** În testul automat, fără fereastră, pagina a desenat 100 de cadre pe secundă cu 50.000 de oameni la viteza 16×.
+- **Densitatea e o medie pe circa 9 m².** În cozi, vârfurile pot trece puțin de 5,4 persoane/m², limita la care modelul oprește mersul, fiindcă trupurile se pot suprapune puțin.
+- **Câți oameni știu ce ieșiri sunt libere e o ipoteză**, nu o măsurătoare, iar rezultatul depinde mult de ea: aceeași evacuare cu 10.000 de oameni durează 7:52 când nimeni nu știe și 5:40 când știe jumătate.
+- **Cine nu știe ce ieșiri sunt libere nu renunță niciodată la ieșirea lui**, oricât de lungă ar fi coada. De aici vin cozile lungi de la final din rezultatele de mai sus.
+- **Netestat:** Safari, Firefox și telefoanele.
 
 ## Surse
 
 - U. Weidmann, *Transporttechnik der Fussgänger*, ETH Zürich, 1993: relația viteză–densitate.
 - *Guide to Safety at Sports Grounds* (Green Guide): 82 de persoane pe minut pe metru de ieșire, pe teren plat.
 - J. A. Sethian, 1996: metoda fast marching.
+- Harta oficială Beach, Please! 2026: [beach-please.ro/map](https://beach-please.ro/map).
+- Participanți: [Euronews România](https://www.euronews.ro/articole/peste-120000-de-oameni-la-beach-please-in-a-doua-seara-de-festival-playboi-carti) (peste 120.000 în a doua seară din 2026), [Știrile ProTV](https://stirileprotv.ro/stiri/actualitate/bilant-dupa-5-zile-de-beach-please-155-000-de-participanti-si-milioane-de-euro-cheltuiti-principalele-controverse.html) (circa 155.000 în ziua de vârf din 2025).
+- Locul și suprafața: [Zile și Nopți](https://zilesinopti.ro/2026/05/20/festivaluri-litoral-2026/), [Revista Biz](https://www.revistabiz.ro/beach-please-a-inregistrat-peste-600-000-de-participanti-in-5-zile-de-festival/).
