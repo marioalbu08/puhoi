@@ -118,19 +118,6 @@ Nu are server și nici pas de build: sunt module JavaScript încărcate direct d
 - **Harta.** La fiecare modificare a planului, procesorul calculează un câmp de distanță cu semn (o transformare chamfer în două treceri) și umbrele aruncate: 5 ms pentru planul de 320 × 200 m, 14 ms pentru Beach, Please!. Shaderul citește 4 valori pe pixel și obține din ele margini netede, acoperișuri cu pantă luminate după normală, umbre și texturile: acoperișul scenei cu bandă LED pe ritm, copertina barului peste tejghea, cabinele de toaletă, gardurile, clădirile și săgețile de la ieșiri. De departe, toate trec în culorile din legendă, ca să nu pâlpâie.
 - **Plăci video slabe.** Oamenii din afara ecranului ies din calcul înainte de orice altceva. Dreptunghiurile sunt strânse pe figură, așa că se desenează de circa 3 ori mai puțini pixeli. Sub 40 de cadre pe secundă, harta se desenează la rezoluție mai mică, până la jumătate. Dacă placa video rămâne în urmă, simularea încetinește în loc să blocheze pagina.
 
-### Performanță
-
-Măsurat în noiembrie 2026, pe un laptop de gaming de câțiva ani, cu ambele plăci video, în Chrome, pe un monitor ultrawide:
-
-| | Placa integrată (de birou) | Placa dedicată (gaming de buget) |
-| --- | --- | --- |
-| Un pas de simulare, 50.000 de oameni | 2,95 ms | 0,54 ms |
-| Un pas de simulare, 120.000 de oameni (Beach, Please!) | 6,43 ms | 1,44 ms |
-| Un cadru, tot planul cu 50.000 de oameni | 7,5 ms | 0,8 ms |
-| Un cadru de aproape, cu omuleți | 17,8 ms | 1,5 ms |
-
-Pe placa integrată, vederea de aproape avea 22–24 de cadre pe secundă înainte de optimizări și are 56 acum, cu simularea în timp real. Laptopurile cu două plăci video dau adesea browserului placa integrată, aici de 5 până la 12 ori mai lentă. Pagina observă asta și îți spune cum treci Chrome pe placa dedicată.
-
 ## Ce am măsurat
 
 Toate cifrele de mai jos se pot reface cu `node test/validate.mjs`.
