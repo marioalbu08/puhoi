@@ -4,7 +4,7 @@
 
 **Demo live:** https://marioalbu08.github.io/puhoi/ (Chrome sau Edge, pe calculator)
 
-WebGPU · fără dependențe · fără build · 165 KB de cod (51 KB comprimat) · 120.000 de oameni la 60 de cadre pe secundă pe un laptop cu GTX 1650
+WebGPU · fără dependențe · fără build · 165 KB de cod (51 KB comprimat) · 120.000 de oameni la 60 de cadre pe secundă pe un laptop de gaming obișnuit
 
 ![Evacuarea a 50.000 de oameni, după circa 3 minute: cozi roșii la ieșirile de lângă scenă](evacuare.png)
 
@@ -120,9 +120,9 @@ Nu are server și nici pas de build: sunt module JavaScript încărcate direct d
 
 ### Performanță
 
-Măsurat pe 25 noiembrie 2026, pe un laptop cu Intel Core i7-9750H, cu ambele plăci video, în Chrome, pe un ecran de 2560 × 1080:
+Măsurat în noiembrie 2026, pe un laptop de gaming de câțiva ani, cu ambele plăci video, în Chrome, pe un monitor ultrawide:
 
-| | Intel UHD 630 (integrată) | NVIDIA GTX 1650 |
+| | Placa integrată (de birou) | Placa dedicată (gaming de buget) |
 | --- | --- | --- |
 | Un pas de simulare, 50.000 de oameni | 2,95 ms | 0,54 ms |
 | Un pas de simulare, 120.000 de oameni (Beach, Please!) | 6,43 ms | 1,44 ms |
