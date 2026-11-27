@@ -15,6 +15,7 @@ WebGPU · fără dependențe · fără build · 165 KB de cod (51 KB comprimat) 
 3. Apasă **C**. Camera zboară în cea mai deasă mulțime, iar cei din fața scenei sar pe ritm.
 4. Apasă **E**. Pornește evacuarea: graficul și tabelul cu porți se completează în timp real.
 5. Alege **Beach, Please! 2026 + ieșiri de urgență ipotetice**, apasă **E** din nou și compară cele două rulări în tabelul „Rulări”.
+6. Pentru ieșirea obișnuită de la final, fără evacuare, alege **Beach, Please! 2026, ieșire la final** și apasă **I**. Se folosesc doar cele două porți publice, din nord-vest (stânga sus) și sud-est (dreapta jos), iar oamenii pleacă treptat, în primele 15 minute.
 
 | De aproape, într-o coadă la ieșire | Concertul, înainte de evacuare |
 | --- | --- |

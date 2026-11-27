@@ -229,6 +229,12 @@ export const LAYOUTS = [
     build(W = 520, H = 400) { return beachPlease(W, H, false); },
   },
   {
+    // the same site at the end of the night: no emergency, people go home through the two public gates
+    id: 'beach-iesire', name: 'Beach, Please! 2026, ieșire la final (porțile din NV și SE)', w: 520, h: 400, people: 120000,
+    note: 'Ieșire obișnuită, nu evacuare: doar cele două porți publice, în nord-vest (stânga sus) și sud-est (dreapta jos). Apasă „Ieșire” (I): oamenii pleacă treptat, în primele 15 minute după ultimul concert.',
+    build(W = 520, H = 400) { return beachPlease(W, H, false); },
+  },
+  {
     id: 'beach-urgenta', name: 'Beach, Please! 2026 + ieșiri de urgență ipotetice', w: 520, h: 400, people: 120000,
     note: 'Aceleași două porți publice, plus 6 ieșiri de urgență de câte 10 m inventate pentru comparație. Ele nu apar în planul real.',
     build(W = 520, H = 400) { return beachPlease(W, H, true); },

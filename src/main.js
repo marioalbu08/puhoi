@@ -13,6 +13,7 @@ import { Render2D } from './render2d.js';
 
 // The map size depends on the plan (most are 320 x 200 m, Beach, Please! is 520 x 400 m); see setMapSize.
 let W = MAP_W, H = MAP_H, CELLS = W * H;
+const EGRESS_SPREAD = 900;               // normal exit: people leave over the first 15 minutes after the show
 const GUIDE = 82;                       // people per metre of exit per minute (Green Guide, level ground)
 const $ = (id) => document.getElementById(id);
 const nf = new Intl.NumberFormat('ro-RO');
@@ -103,7 +104,7 @@ async function boot() {
   gridChanged();
   requestAnimationFrame(frame);
   setInterval(() => poll().catch((e) => console.error('poll: ' + e.message)), 250);
-  if (q.get('auto') === 'evac') S.autoEvac = Number(q.get('settle')) || 20;
+  if (q.get('auto') === 'evac' || q.get('auto') === 'egress') { S.autoEvac = Number(q.get('settle')) || 20; S.autoType = q.get('auto'); }
   window.puhoi = { S, startEvac, reset, mmss, flyTo, setLayout };
   if (!fromLink && start.note) showMsg(start.note, 9000);
 }
@@ -193,7 +194,7 @@ function place() {
   S.exitRate = new Map();
   if (crowd.n === 0) showMsg('Din niciun loc nu se poate ajunge la o ieșire. Desenează o ieșire și apasă „De la capăt”.');
   else if (crowd.n < S.N) showMsg(`Pe planul acesta încap ${nf.format(crowd.n)} de oameni.`, 6000);
-  $('evac').disabled = crowd.n === 0;
+  $('evac').disabled = crowd.n === 0; $('egress').disabled = crowd.n === 0;
   updateHero(); updateGuide(); drawChart(); renderExits(true);
 }
 
@@ -226,7 +227,9 @@ function findLabels() {
 
 // ------------------------------------------------------------------ evacuation
 
-function startEvac() {
+// type 'evac': everyone leaves within the reaction time; type 'egress': the show is over and people
+// leave at their own pace, spread over EGRESS_SPREAD seconds.
+function startEvac(type = 'evac') {
   if (S.phase !== 'concert' || S.inside <= 0) return;
   if (!S.an.exits.length) { showMsg('Planul nu are nicio ieșire. Desenează una cu unealta „Ieșire”.', 6000); return; }
   const P = S.sim.params;
@@ -234,12 +237,13 @@ function startEvac() {
   S.evac = {
     n0: S.inside, out0: st ? st[0] : 0, removed0: st ? st[64] : 0,
     samples: [[0, S.inside]], marks: {}, prev: [0, 0], lastChange: 0, end: null, kind: null,
+    type, reactMax: type === 'egress' ? EGRESS_SPREAD : S.settings.reactMax,
   };
-  P.mode = 1; P.evacTime = 0; P.guided = S.settings.guided; P.reactMax = S.settings.reactMax;
+  P.mode = 1; P.evacTime = 0; P.guided = S.settings.guided; P.reactMax = S.evac.reactMax;
   S.sim.resetRisk();
   S.dens.expo = 0; S.dens.maxEver = 0;
   S.phase = 'evac'; S.running = true;
-  $('evac').disabled = true;
+  $('evac').disabled = true; $('egress').disabled = true;
   updateHero(); updatePlay();
 }
 
@@ -253,7 +257,7 @@ async function finish(kind, left) {
   if (d) onDensity(d);
   const width = S.an.exits.reduce((s, e) => s + e.width, 0);
   S.runs.push({
-    n: E.n0, width, guided: S.settings.guided, t95: E.marks[95], t100: kind === 'complete' ? E.end : null,
+    type: E.type, n: E.n0, width, guided: S.settings.guided, t95: E.marks[95], t100: kind === 'complete' ? E.end : null,
     left, expo: S.dens.expo, maxD: S.dens.maxEver,
   });
   renderRuns(); updateHero(); updateGuide(); drawChart();
@@ -301,8 +305,8 @@ function onStats(stats, tE, tS) {
     const last = E.samples[E.samples.length - 1];
     if (tE - last[0] >= 1 || left <= 0) E.samples.push([tE, Math.max(0, left)]);
     if (left <= 0) finish('complete', 0);
-    else if (tE - E.lastChange > 60 && tE > S.settings.reactMax + 60) finish('blocked', left);
-  } else if (S.phase === 'concert' && S.autoEvac && tS >= S.autoEvac) { S.autoEvac = 0; startEvac(); }
+    else if (tE - E.lastChange > 60 && tE > E.reactMax + 60) finish('blocked', left);
+  } else if (S.phase === 'concert' && S.autoEvac && tS >= S.autoEvac) { S.autoEvac = 0; startEvac(S.autoType); }
   updateHero(); renderExits(false); drawChart();
 }
 
@@ -343,11 +347,12 @@ function updateHero() {
   prog.hidden = false;
   prog.firstElementChild.style.width = (E.n0 ? Math.min(100, o / E.n0 * 100) : 0) + '%';
   if (S.phase === 'evac') {
-    $('phase').textContent = S.running ? 'Evacuare' : 'Evacuare, pe pauză';
+    const what = E.type === 'egress' ? 'Ieșire' : 'Evacuare';
+    $('phase').textContent = S.running ? what : what + ', pe pauză';
     $('hero').textContent = mmss(P.evacTime);
     $('heroSub').textContent = `au ieșit ${nf.format(o)} din ${nf.format(E.n0)} (${Math.floor(o / E.n0 * 100)}%)`;
   } else {
-    $('phase').textContent = 'Evacuare încheiată';
+    $('phase').textContent = E.type === 'egress' ? 'Ieșire încheiată' : 'Evacuare încheiată';
     $('hero').textContent = mmss(E.end);
     $('heroSub').textContent = E.kind === 'complete' ? `toți cei ${nf.format(E.n0)} de oameni au ieșit`
       : `${nf.format(E.left)} oameni nu au ajuns la nicio ieșire`;
@@ -369,7 +374,8 @@ function updateGuide() {
   else {
     text = `Calculul din ghid dă ${mmss(g.t)} pentru ${nf.format(n)} de oameni și ${g.width} m de ieșiri.`;
     if (S.evac && S.evac.kind === 'complete') text += ` Simularea a dat ${mmss(S.evac.end)}, fiindcă ține cont de drumul până la poartă și de cozile inegale.`;
-    else text += ' El presupune că toate porțile lucrează la capacitate din prima secundă. Apasă „Evacuare” ca să vezi cât durează în simulare.';
+    if (S.evac && S.evac.type === 'egress') text += ` La ieșirea obișnuită oamenii nu pleacă toți deodată: pornesc treptat, în primele ${EGRESS_SPREAD / 60} minute.`;
+    else text += ' El presupune că toate porțile lucrează la capacitate din prima secundă. Apasă „Evacuare” sau „Ieșire” ca să vezi cât durează în simulare.';
   }
   $('guideNote').textContent = text;
   if (!S.evac) $('marks').tBodies[0].rows[0].querySelectorAll('td').forEach((td) => { td.textContent = '–'; });
@@ -421,7 +427,7 @@ function renderRuns() {
       const d = r.t100 - prev.t100;
       total += ` (${d <= 0 ? '−' : '+'}${mmss(Math.abs(d))})`;
     }
-    [i + 1, nf.format(r.n), r.width + ' m', r.t95 != null ? mmss(r.t95) : '–', total, nf.format(Math.round(r.expo))]
+    [`${i + 1} ${r.type === 'egress' ? 'ieșire' : 'evac.'}`, nf.format(r.n), r.width + ' m', r.t95 != null ? mmss(r.t95) : '–', total, nf.format(Math.round(r.expo))]
       .forEach((v) => { tr.insertCell().textContent = v; });
   });
 }
@@ -852,7 +858,8 @@ function buildUi(fromLink) {
   $('people').onchange = () => { S.N = Number($('people').value); reset(); };
   $('play').onclick = () => { S.running = !S.running; updatePlay(); updateHero(); };
   $('speed').onclick = (e) => { if (e.target.dataset.v) setSpeed(Number(e.target.dataset.v)); };
-  $('evac').onclick = startEvac;
+  $('evac').onclick = () => startEvac('evac');
+  $('egress').onclick = () => startEvac('egress');
   $('reset').onclick = reset;
   $('undo').onclick = undo;
   $('brush').oninput = () => { S.brush = Number($('brush').value); $('brushOut').textContent = S.brush + ' m'; };
@@ -864,7 +871,7 @@ function buildUi(fromLink) {
   };
   $('guided').value = Math.round(S.settings.guided * 100); $('guidedOut').textContent = Math.round(S.settings.guided * 100) + '%';
   $('guided').oninput = () => { S.settings.guided = Number($('guided').value) / 100; $('guidedOut').textContent = $('guided').value + '%'; S.sim.params.guided = S.settings.guided; };
-  $('react').oninput = () => { S.settings.reactMax = Number($('react').value); $('reactOut').textContent = $('react').value + ' s'; S.sim.params.reactMax = S.settings.reactMax; };
+  $('react').oninput = () => { S.settings.reactMax = Number($('react').value); $('reactOut').textContent = $('react').value + ' s'; if (!S.evac || S.evac.type !== 'egress') S.sim.params.reactMax = S.settings.reactMax; };
   $('colorMode').onchange = () => { S.settings.colorMode = Number($('colorMode').value); };
   $('layer').onchange = () => { S.settings.layer = Number($('layer').value); };
 
@@ -880,7 +887,8 @@ function buildUi(fromLink) {
     const t = TOOLS.find((x) => x.key === e.key);
     if (t) setTool(t.id);
     else if (e.key === ' ') { e.preventDefault(); $('play').click(); }
-    else if (e.key.toLowerCase() === 'e') startEvac();
+    else if (e.key.toLowerCase() === 'e') startEvac('evac');
+    else if (e.key.toLowerCase() === 'i') startEvac('egress');
     else if (e.key.toLowerCase() === 'r') reset();
   });
   setupPointer();

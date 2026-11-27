@@ -143,15 +143,20 @@ fn main(@builtin(global_invocation_id) gid: vec3u) {
   if (solid(g & 255u)) {
     var offs = array<vec2i, 8>(vec2i(1, 0), vec2i(-1, 0), vec2i(0, 1), vec2i(0, -1),
                                vec2i(1, 1), vec2i(-1, 1), vec2i(1, -1), vec2i(-1, -1));
-    var found = false;
+    // nearest free cell; a fenced-off one (no way to any exit) only when there is nothing else
+    var found = false; var best = 1e9; var bd = vec2f(0.0);
     for (var k = 0; k < 8; k++) {
       let o = offs[k];
-      if (!found && !solid(cellType(cx + o.x, cy + o.y))) {
-        let d = vec2f(f32(cx + o.x) + 0.5, f32(cy + o.y) + 0.5) - p;
-        let l = length(d);
-        a.pos = p + d * (min(l, 2.0 * P.dt) / max(l, 1e-6));
-        found = true;
+      let nx = cx + o.x; let ny = cy + o.y;
+      if (!solid(cellType(nx, ny))) {
+        let d = vec2f(f32(nx) + 0.5, f32(ny) + 0.5) - p;
+        let shut = select(0.0, 100.0, fields[G_EXIT * P.w * P.h + u32(ny) * P.w + u32(nx)].z > 1e8);
+        if (length(d) + shut < best) { best = length(d) + shut; bd = d; found = true; }
       }
+    }
+    if (found) {
+      let l = length(bd);
+      a.pos = p + bd * (min(l, 2.0 * P.dt) / max(l, 1e-6));
     }
     if (!found) { a.goal = G_GONE; a.pos = vec2f(-10.0); atomicAdd(&stats[64], 1u); }
     a.vel = vec2f(0.0);

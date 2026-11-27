@@ -158,15 +158,21 @@ export class CpuSim {
     const g = grid[c];
 
     // Standing inside something that was just built: step out, or be removed if boxed in.
+    // Step to the nearest free cell, and only into a fenced-off area (no way to any exit) when
+    // there is nothing else: a thin fence must never let people through to the other side.
     if (isSolid(g & 255)) {
-      let found = false;
-      for (let k = 0; k < 8 && !found; k++) {
-        if (!isSolid(this.cellType(cx + OX[k], cy + OY[k]))) {
-          const dx = cx + OX[k] + 0.5 - px, dy = cy + OY[k] + 0.5 - py;
-          const d = Math.hypot(dx, dy), m = Math.min(d, 2.0 * DT) / (d || 1);
-          fB[o + A_X] = px + dx * m; fB[o + A_Y] = py + dy * m;
-          found = true;
-        }
+      let found = false, best = 1e9, bx = 0, by = 0;
+      const exitBase = G_EXIT * this.cells * 4;
+      for (let k = 0; k < 8; k++) {
+        const nx = cx + OX[k], ny = cy + OY[k];
+        if (isSolid(this.cellType(nx, ny))) continue;
+        const dx = nx + 0.5 - px, dy = ny + 0.5 - py;
+        const shut = this.fields[exitBase + (ny * W + nx) * 4 + 2] > 1e8 ? 100 : 0;
+        if (Math.hypot(dx, dy) + shut < best) { best = Math.hypot(dx, dy) + shut; bx = dx; by = dy; found = true; }
+      }
+      if (found) {
+        const d = Math.hypot(bx, by), m = Math.min(d, 2.0 * DT) / (d || 1);
+        fB[o + A_X] = px + bx * m; fB[o + A_Y] = py + by * m;
       }
       if (!found) { uB[o + A_GOAL] = G_GONE; fB[o + A_X] = -10; fB[o + A_Y] = -10; stats[64]++; }
       fB[o + A_VX] = 0; fB[o + A_VY] = 0;
