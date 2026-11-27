@@ -12,10 +12,10 @@ WebGPU · fără dependențe · fără build · 165 KB de cod (51 KB comprimat) 
 
 1. Deschide [demo-ul](https://marioalbu08.github.io/puhoi/) în Chrome sau Edge.
 2. La „Plan de pornire”, alege **Beach, Please! 2026 (aproximativ, doar porțile publice)**.
-3. Apasă **C**. Camera zboară în cea mai deasă mulțime, iar cei din fața scenei sar pe ritm.
-4. Apasă **E**. Pornește evacuarea: graficul și tabelul cu porți se completează în timp real.
-5. Alege **Beach, Please! 2026 + ieșiri de urgență ipotetice**, apasă **E** din nou și compară cele două rulări în tabelul „Rulări”.
-6. Pentru ieșirea obișnuită de la final, fără evacuare, alege **Beach, Please! 2026, ieșire la final** și apasă **I**. Se folosesc doar cele două porți publice, din nord-vest (stânga sus) și sud-est (dreapta jos), iar oamenii pleacă treptat, în primele 15 minute.
+3. Apasă **De aproape** (sau tasta C). Camera zboară în cea mai deasă mulțime, iar cei din fața scenei sar pe ritm.
+4. Apasă **Evacuare** (sau E). Graficul și tabelul cu porți se completează în timp real.
+5. Alege **Beach, Please! 2026 + ieșiri de urgență ipotetice**, apasă din nou **Evacuare** și compară cele două rulări în tabelul „Rulări”.
+6. Pentru ieșirea obișnuită de la final, fără evacuare, alege **Beach, Please! 2026, ieșire la final** și apasă **Ieșire** (sau I). Se folosesc doar cele două porți publice, din nord-vest (stânga sus) și sud-est (dreapta jos), iar oamenii pleacă treptat, în primele 15 minute.
 
 | De aproape, într-o coadă la ieșire | Concertul, înainte de evacuare |
 | --- | --- |
@@ -42,11 +42,11 @@ Am lărgit apoi cele două porți de lângă scenă de la 4 m la 12 m și am rul
 
 Cu o treime mai mulți metri de poartă, evacuarea se scurtează cu 46%, iar expunerea scade de 40 de ori. Calculul din ghid nu poate arăta asta, fiindcă nu știe unde sunt porțile.
 
-## Studiu de caz: Beach, Please! 2026
+## Exemplu: un festival mare, după harta publică
 
 Beach, Please! 2026 a avut loc între 8 și 12 iulie, în stațiunea NIBIRU din Costinești, pe aproximativ 21 de hectare. În a doua seară au intrat peste 120.000 de oameni, iar vârful festivalului a fost de circa 155.000 pe zi. Harta oficială arată patru scene și **două porți publice**, la aproape 650 m una de alta: una în nord-vest, dinspre parcare, peste calea ferată, și una în sud-est, spre faleză.
 
-Planul de evacuare al festivalului nu este public. Nici organizatorii, nici ISU Dobrogea nu au publicat numărul sau lățimea ieșirilor de urgență și nici punctele de adunare. De aceea, simularea nu spune cât durează evacuarea reală. Ea arată cât ar dura cu ipotezele de mai jos și cât contează fiecare metru de poartă.
+Harta publică arată doar intrările pentru public. Ieșirile de urgență, lățimile lor și punctele de adunare sunt în planul de evacuare al festivalului, pe care nu l-am avut. De aceea, cifrele de mai jos **nu spun cât durează evacuarea reală** a festivalului. Ele arată metoda: ce află, în câteva rulări, echipa care are planul adevărat și îl desenează în Puhoi, și cât contează locul fiecărei ieșiri.
 
 Am refăcut planul la scară, 520 × 400 m, cu o celulă pe metru, după harta oficială 2026:
 
@@ -74,11 +74,11 @@ Rezultatele, cu 120.000 de oameni și ipotezele implicite (jumătate știu ce ie
 | Densitatea maximă | 5,8 pers./m² | 6,1 pers./m² |
 | Expunere la peste 5 pers./m² | 39.830 persoane-minut | 268.753 persoane-minut |
 
-**Doar cu porțile publice**, evacuarea durează cu 19 minute mai mult decât spune ghidul. Porțile sunt la 650 m una de alta, iar publicul de la scena principală, din colțul de sud-vest, trebuie să traverseze tot terenul. Poarta de sud-est preia 73.969 de oameni (62%), iar cea de nord-vest 46.031.
+**Cu doar cele două porți publice**, simularea dă cu 19 minute mai mult decât calculul din ghid. Diferența vine din geometrie, pe care împărțirea din ghid n-o vede: porțile sunt la 650 m una de alta, iar publicul de la scena principală, din colțul de sud-vest, trebuie să traverseze tot terenul. Poarta de sud-est preia 73.969 de oameni (62%), iar cea de nord-vest 46.031.
 
-**Cu încă 60 m de ieșiri**, prima jumătate a publicului iese de două ori mai repede, dar ultimii oameni ies mai târziu (62:00 față de 49:30), iar expunerea e de 7 ori mai mare. Explicația e în numărătoarea pe ieșiri: ieșirea de 10 m din sud, dintre scena principală și Nibiru Arena, a strâns 29.397 de oameni, iar una de pe latura de est 19.249. Cine nu știe ce ieșiri sunt libere merge la cea mai apropiată și rămâne la ea. Prin 10 m, 29.397 de oameni au nevoie de cel puțin 36 de minute, chiar la debitul maxim din ghid.
+**Cu încă 60 m de ieșiri, inventate de noi**, prima jumătate a publicului iese de două ori mai repede, dar ultimii oameni ies mai târziu (62:00 față de 49:30), iar expunerea e de 7 ori mai mare. Explicația e în numărătoarea pe ieșiri: ieșirea de 10 m din sud, dintre scena principală și Nibiru Arena, a strâns 29.397 de oameni, iar una de pe latura de est 19.249. Cine nu știe ce ieșiri sunt libere merge la cea mai apropiată și rămâne la ea. Prin 10 m, 29.397 de oameni au nevoie de cel puțin 36 de minute, chiar la debitul maxim din ghid.
 
-Concluzia: mai multe ieșiri nu ajută automat. Contează unde sunt și cât de late sunt față de mulțimea din jurul lor, iar asta se vede doar dacă simulezi fiecare om. În aplicație poți lărgi chiar tu ieșirile cele mai aglomerate și poți compara rulările.
+Concluzia: metrii de ieșire nu ajung. Contează unde sunt ieșirile și cât de late sunt față de mulțimea din jurul lor, iar asta se vede doar dacă simulezi fiecare om. În aplicație poți lărgi chiar tu ieșirile cele mai aglomerate și poți compara rulările.
 
 ## Ce face
 
@@ -190,7 +190,7 @@ node test/validate.mjs evac 10000 0   # evacuarea planului implicit, 10.000 de o
 ## Limitări
 
 - **Nu e un instrument certificat.** Arată diferențe între planuri, dar nu înlocuiește planul de evacuare făcut de un specialist.
-- **Planul Beach, Please! e aproximativ**, iar lățimile porților și ieșirile de urgență sunt presupuse (vezi studiul de caz).
+- **Planul Beach, Please! e aproximativ**, iar lățimile porților și ieșirile de urgență sunt presupuse (vezi exemplul de mai sus).
 - **Oamenii sunt cuminți.** Nu există panică, căzături, grupuri care vor să rămână împreună sau oameni care se întorc după cineva.
 - **Terenul e plat**, fără scări, pante sau noroi, iar dincolo de poartă e loc liber: oamenii dispar imediat ce au ieșit. Coada de la gară sau de la autobuze nu e simulată.
 - **Grila e de 1 m.** Gardurile au cel puțin 1 m grosime, iar porțile au lățimi în metri întregi.

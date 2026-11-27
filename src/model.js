@@ -225,7 +225,7 @@ export const LAYOUTS = [
   {
     // w, h: map size when it is not MAP_W x MAP_H; people: the crowd it opens with
     id: 'beach', name: 'Beach, Please! 2026 (aproximativ, doar porțile publice)', w: 520, h: 400, people: 120000,
-    note: 'Plan aproximativ, după harta oficială 2026 (Costinești, NIBIRU). Organizatorii nu au publicat planul de evacuare: cele două porți publice au aici câte 24 m, presupus.',
+    note: 'Plan aproximativ, după harta oficială 2026 (Costinești, NIBIRU). Harta arată doar porțile pentru public, nu și ieșirile de urgență ale festivalului. Cele două porți au aici câte 24 m, presupus.',
     build(W = 520, H = 400) { return beachPlease(W, H, false); },
   },
   {
@@ -236,7 +236,7 @@ export const LAYOUTS = [
   },
   {
     id: 'beach-urgenta', name: 'Beach, Please! 2026 + ieșiri de urgență ipotetice', w: 520, h: 400, people: 120000,
-    note: 'Aceleași două porți publice, plus 6 ieșiri de urgență de câte 10 m inventate pentru comparație. Ele nu apar în planul real.',
+    note: 'Aceleași două porți publice, plus 6 ieșiri de urgență de câte 10 m, inventate pentru comparație. Nu sunt ieșirile reale ale festivalului.',
     build(W = 520, H = 400) { return beachPlease(W, H, true); },
   },
 ];
